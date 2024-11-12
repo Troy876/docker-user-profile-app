@@ -62,14 +62,17 @@ jobs:
 
       - name: Run MongoDB container
         run: |
-          docker run -d --net mongo-network --name mongoDB -e MONGO_INITDB_ROOT_USERNAME=admin -e MONGO_INITDB_ROOT_PASSWORD=secret mongo:8.0-rc
+          docker run -d --network mongo-network --name mongoDB -e MONGO_INITDB_ROOT_USERNAME=admin -e MONGO_INITDB_ROOT_PASSWORD=secret mongo:8.0-rc
 
       - name: Run application container
         run: |
           docker run -d --network mongo-network --name ${{ env.APP_NAME }} -p 3000:3000 -e MONGO_PASS=secret -e MONGO_HOST=mongoDB ${{ secrets.DOCKER_HUB_USERNAME }}/${{ env.APP_NAME }}:${{ github.sha }}
 
       - name: Show running containers
-        run: docker ps
+        run: docker ps -a
+
+      - name: Show MongoDB container logs
+        run: docker logs mongoDB
 
       - name: Show application logs
         run: docker logs ${{ env.APP_NAME }}
@@ -77,5 +80,11 @@ jobs:
       - name: Install curl
         run: apk add --no-cache curl
 
+      - name: Check network connectivity to app container
+        run: docker exec ${{ env.APP_NAME }} ping -c 4 ${{ env.APP_NAME }}
+
+      - name: Wait for app to start
+        run: docker exec ${{ env.APP_NAME }} curl -f http://localhost:3000 || exit 1
+
       - name: Test application
-        run: curl http://docker:3000 | grep 'User profile'
+        run: curl http://${{ env.APP_NAME }}:3000 | grep 'User profile'
