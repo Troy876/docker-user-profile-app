@@ -10,15 +10,42 @@ env:
   DOCKER_HUB_USERNAME: 'troybarrett8362'
 
 jobs:
+  name: Docker Build and Publish
+
+on:
+  push:
+    branches:
+      - main
+
+env:
+  APP_NAME: 'profile-app'
+  DOCKER_HUB_USERNAME: 'troybarrett8362'
+
+jobs:
   build-and-publish:
     runs-on: ubuntu-latest
-    container:
-      image: docker:20.10.16
+    environment: build
     steps:
-      - name: Check Docker version
-        run: |
-          echo "Build stage executed"
-          docker --version
+      - name: Check out code
+        uses: actions/checkout@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_HUB_USERNAME }}
+          password: ${{ secrets.DOCKER_HUB_TOKEN }}
+
+      - name: Build Docker image
+        run: docker build -t ${{ env.DOCKER_HUB_USERNAME }}/${{ env.APP_NAME }} .
+
+      - name: Tag Docker image
+        run: docker tag ${{ env.DOCKER_HUB_USERNAME }}/${{ env.APP_NAME }}:latest ${{ env.DOCKER_HUB_USERNAME }}/${{ env.APP_NAME }}:${{ github.sha }}
+
+      - name: Push Docker image
+        run: docker push ${{ env.DOCKER_HUB_USERNAME }}/${{ env.APP_NAME }}:${{ github.sha }}
 
   base-test:
     runs-on: ubuntu-latest
