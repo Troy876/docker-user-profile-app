@@ -75,4 +75,4 @@ jobs:
         run: apk add --no-cache curl
 
       - name: Test application
-        run: curl http://${{ env.APP_NAME }}:3000 | grep 'User profile'
+        run: curl http://docker:3000 | grep 'User profile'
