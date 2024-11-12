@@ -38,6 +38,9 @@ jobs:
   base-test:
     runs-on: ubuntu-latest
     needs: build-and-publish
+    container:
+      image: docker:27.0.2-cli-alpine3.20
+      options: --privileged
     steps:
       - name: Check out code
         uses: actions/checkout@v4
@@ -70,15 +73,6 @@ jobs:
 
       - name: Show application logs
         run: docker logs ${{ env.APP_NAME }}
-
-      - name: Install curl
-        run: sudo apt-get update && sudo apt-get install -y curl
-
-      - name: Install wait-for-it script
-        run: curl -sSfL https://raw.githubusercontent.com/vishnubob/wait-for-it/master/wait-for-it.sh -o wait-for-it.sh && chmod +x wait-for-it.sh
-
-      - name: Wait for the application container to be ready
-        run: ./wait-for-it.sh ${{ env.APP_NAME }}:3000 --timeout=30 -- echo "App is up"
 
       - name: Test application
         run: curl http://${{ env.APP_NAME }}:3000 | grep 'User profile'
