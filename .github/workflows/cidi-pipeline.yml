@@ -77,10 +77,11 @@ jobs:
       - name: Show application logs
         run: docker logs ${{ env.APP_NAME }}
 
-      - name: Install curl temporarily
-        run: |
-          docker exec ${{ env.APP_NAME }} sh -c "apt-get update && apt-get install -y curl"
-          docker exec ${{ env.APP_NAME }} curl -f http://localhost:3000 || exit 1
+      - name: Install curl
+        run: docker exec ${{ env.APP_NAME }} sh -c "apk add --no-cache curl"
+
+      - name: Wait for the app to start
+        run: docker exec ${{ env.APP_NAME }} sh -c "until curl -f http://localhost:3000; do echo 'Waiting for app to start...'; sleep 5; done"
 
       - name: Test application
-        run: curl http://${{ env.APP_NAME }}:3000 | grep 'User profile'
+        run: docker exec ${{ env.APP_NAME }} curl -f http://localhost:3000 | grep 'User profile'
