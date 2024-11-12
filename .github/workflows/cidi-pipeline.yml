@@ -72,7 +72,7 @@ jobs:
         run: docker logs ${{ env.APP_NAME }}
 
       - name: Install curl
-        run: apk add --no-cache curl
+        run: sudo apt-get update && sudo apt-get install -y curl
 
       - name: Test application
         run: curl http://docker:3000 | grep 'User profile'
