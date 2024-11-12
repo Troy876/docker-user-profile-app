@@ -10,18 +10,6 @@ env:
   DOCKER_HUB_USERNAME: 'troybarrett8362'
 
 jobs:
-  name: Docker Build and Publish
-
-on:
-  push:
-    branches:
-      - main
-
-env:
-  APP_NAME: 'profile-app'
-  DOCKER_HUB_USERNAME: 'troybarrett8362'
-
-jobs:
   build-and-publish:
     runs-on: ubuntu-latest
     environment: build
