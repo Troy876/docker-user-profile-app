@@ -1,0 +1,32 @@
+name: CICD Pipeline
+
+on:
+  push:
+    branches:
+      - main
+
+env:
+  APP_NAME: 'profile-app'
+  DOCKER_HUB_USERNAME: 'troybarrett8362'
+
+jobs:
+  build-and-publish:
+    runs-on: ubuntu-latest
+    container:
+      image: docker:20.10.16
+    steps:
+      - name: Check Docker version
+        run: |
+          echo "Build stage executed"
+          docker --version
+
+  base-test:
+    runs-on: ubuntu-latest
+    needs: build-and-publish
+    container:
+      image: docker:20.10.16
+    steps:
+      - name: Before script
+        run: echo 'Execute before main script'
+      - name: Test script
+        run: echo "Reference a variable - ${{ env.APP_NAME }} "
